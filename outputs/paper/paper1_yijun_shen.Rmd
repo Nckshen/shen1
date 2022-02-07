@@ -1,0 +1,148 @@
+---
+title: "STA304"
+author: "Yijun Shen"
+date: "06/02/2022"
+output: pdf_document
+abstract: "The open and transparent crime data is one of the effective tools to protect citizens and prevent them from committing crimes. Traditionally, there are many causes of crime, but only one way to stop it is the police. Toronto Police Department, however, offers a different answer, that is, ordinary people should stop it. Crime in the world will never stop, and the only person who can really help you is yourself."
+bibliography: ref_list.bib
+---
+Footnote^[]
+
+## Introduction
+In today's society, COVID-19 is one of the most frustrating viruses, not only threatening people's lives, but also affects global economic development. According to the report of KPMG, during 2019-2020, the global economy will decrease 11%-12%.(KPMG, 2021). Many people lost their jobs due to the pandemic, and the whole city was locked down, which means that many people lost their income, which may push the crime rate increase. A report in USA Today suggests that COVID-19 and quarantine policies may be driving up crime rates.(Fox, 2021). In the stage of rising crime rate, how to protect oneself has become a crucial topic. Toronto Police Services has set up a Public Safety Data Portal, which keeps track of all the crime data, and all the data are available to be downloaded for analysis. It is a good way to inform the masses about crimes. It also allows people to prevent and protect themselves from harm while learning about crime.(Toronto Police Service, 2021).
+
+```{r setup, include=FALSE, message=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+library(opendatatoronto)
+library(dplyr)
+
+# get package
+package <- show_package("9cd09dd7-4453-43bd-af7a-caf42e565103")
+package
+
+# get all resources for this package
+resources <- list_package_resources("9cd09dd7-4453-43bd-af7a-caf42e565103")
+
+# identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+# load the first datastore resource as a sample
+data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+data
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+data1 = subset(data, select = -c(Index_, ObjectId, geometry)) %>%
+  filter(2016<=ReportedYear & ReportedYear<=2020) 
+filter(data1, AgeGroup != "Unknown")
+```
+\newpage
+Proving that transparency in crime data allows people to better understand crime and protect themselves from it. I will use one of the posted data from the Public Safety Data Portal to analyze what kind of crime is most likely to happen in life, and what kind of groups are most likely to be hurt by crime. Finally, the reasons for the rising crime rate are analyzed. All data analysis will be done on R Studio. I will use tidyverse and dplyr packages in the process of data analysis. The analyzed images and tables will be performed using ggplot2 and Knitr ::kable. At the end, I will use knitr to generate the report through R Markdown.
+```{r}
+glimpse(data1)
+
+```
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+summary(data1)
+```
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+ggplot(data = data1, aes(x = ReportedYear)) + 
+  geom_histogram(color = "black", fill = "grey", bins = 5) + 
+  labs(x = "Year", title = "Histogram of Number count in each year")
+```
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+data1 %>% ggplot(aes(x = Subtype, fill = Sex))+geom_bar()+theme_classic()+
+  geom_text(stat = 'count', aes(label = ..count.., vjust = -3)) +
+  labs(x="Subtype", y="Count", title = "Count of different Subtype")
+```
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+data1 %>% ggplot(aes(x = Count_, y = ReportedYear)) + geom_point() + 
+  theme_classic() + 
+  labs(x = "Numbers of incidents", 
+       y = "Year", title = "Plot of number of incidents in different year")
+```
+Count the number of crimes by year and categorize the number of crimes by subtype. As can seen from the figure, the number of Subtype Assault accounts for 50% of the total number of the year. And the rest Subtype make up the other 50%. The graph also shows that there is a certain amount of risk in life. Since assault makes up 50% of the annual crime data, it can be concluded that people can be hurt at any time without noticing. This conclusion is also based on data analysis, which well demonstrates the effectiveness of Toronto Police Services' approach to data disclosure.
+
+```{r}
+data1 %>% ggplot(aes(x = ReportedYear, fill = Subtype)) + geom_bar() +
+  theme_classic() + 
+ labs(x = "Year", 
+      y = "Count", title = "Bar plot of incidents in different year")
+```
+\newpage
+According to a report about gender and victimization, men aged 16 to 24 are more likely to experience violence than women.(Sundaram, 2003). As the graph shows below, during 2016-2020, in the statistics of the number of victims, male victims are higher than female victims, which indicates that women are not the absolute high-risk group, but men are more vulnerable than women. Based on a Global News report, the report said that:”The term “femicide” isn’t meant to convey that women are being killed more often than men.”(Gerster, 2020). Although women are traditionally believed to be more vulnerable to crime, according to research from the Government of Canada, men are more likely to commit violent crimes than women, and the consequences are much more serious than female violent crimes. Moreover, it is pointed out in this report that some specific male groups are more likely to suffer violent crimes than the general group.(Brown, 2020). Therefore, as Sundaram mentioned, “Improved understanding of the relationship between gender specific violence and victimization as a consequence of gender specific violence is essential for targeted violence prevention.” All people should protect themselves from harm, not only for women, but also for men to protect themselves from harm by avoiding unnecessary conflicts in their lives.
+
+```{r}
+data1 %>% ggplot(aes(x = Sex)) + geom_bar() + theme_classic() + 
+  labs(x = "Gender", y = " Count", title = "Counts in different gender")
+```
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+data1 %>% ggplot(aes(y = Count_, x = AgeCohort, color = Sex)) + geom_point() + 
+  theme_classic() + labs(x = "Age Group", y = "Count",
+                         title = "Count of Crime in different Age Group and Sex")
+```
+\newpage
+The table below shows the summary of the yearly crime and victims report. In the table, the maximum crime report in 5 years has an upward trend, compared to the max crime report in 2016, there will be a nearly 10% increase in crime report in 2020. The reason why the crime report will increase so fast is because of the pandemic. According to a report by Jack Blumgart, the rise in crime is largely due to people having nothing to do during the pandemic.( Blumgart, 2021). During the pandemic, nearly 80,000 cars were stolen, a 1% increase, and most of the stolen vehicles were difficult or impossible to recover. The main reason for the theft was a shortage of car chips caused by the pandemic, which made it lucrative for criminals. And with the development of technology, criminals can steal a locked car in 30 seconds by using the latest technology.(Casey, 2021). One of the main reasons for the increase in thefts is the economic recession. During the epidemic, Canada's economy was also hit hard, which caused many people to lose their jobs, which indirectly led to the increase in the crime rate, because those who lost their jobs had nothing to do, so they had the opportunity to engage in violent crimes.(Blumgart, 2021).
+```{r}
+summary_table <- data1 %>% group_by(ReportedYear) %>% summarise(min = min(Count_),
+                                                       Q1 = quantile(Count_,0.25),
+                                                       median = median(Count_),
+                                                       Q3 = quantile(Count_,0.75),
+                                                       max = max(Count_),
+                                                       IQR = Q3 - Q1,
+                                                       mean = mean(Count_),
+                                                       sd = sd(Count_),
+                                                       )
+knitr::kable(summary_table)
+```
+In conclusion, the best way to prevent crime is to let people know about crime, and let people know the harm. Crime not only hurts others, but also the perpetrator. By analyzing the data reports of Toronto Police Services, we can obtain a lot of useful information and effectively reduce the occurrence of crimes. However, crimes cannot disappear just as civilization cannot disappear. Only effective prevention and efficient handling of crimes can minimize the loss and damage caused by crimes. There are also shortcomings in the data provided by Toronto Police Services. Only by recording the data more comprehensively can crime prevention be more effective.
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+summary_table <- data1 %>% group_by(Sex) %>% summarise(min = min(Count_),
+                                                       Q1 = quantile(Count_,0.25),
+                                                       median = median(Count_),
+                                                       Q3 = quantile(Count_,0.75),
+                                                       max = max(Count_),
+                                                       IQR = Q3 - Q1,
+                                                       mean = mean(Count_),
+                                                       sd = sd(Count_),
+                                                       )
+knitr::kable(summary_table)
+```
+
+
+
+```{r, include=FALSE, echo=FALSE, message=FALSE}
+citation("dplyr")
+citation("knitr")
+citation("ggplot2")
+```
+
+
+\newpage
+
+@1
+@2
+@3
+@4
+@5
+@6
+@7
+@8
+@9
+@10
+@11
+@12
+@13
+@14
+# Reference
+ 
